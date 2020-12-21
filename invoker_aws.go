@@ -10,7 +10,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -35,7 +34,7 @@ type AWSServerless struct {
 	logGroupName string
 	logClient    *cloudwatchlogs.CloudWatchLogs
 	eventCache   *lru.Cache
-	requestId    string
+	requestID    string
 }
 
 // NewAWSServerless returns new Serverless struct for AWS Lambda
@@ -52,10 +51,7 @@ func NewAWSServerless(config *Config) (*AWSServerless, error) {
 	}
 	awsOpts := session.Options{
 		SharedConfigState: session.SharedConfigEnable,
-		AssumeRoleTokenProvider: func() (string, error) {
-			return stscreds.StdinTokenProvider()
-		},
-		Config: *awsConfig,
+		Config:            *awsConfig,
 	}
 
 	cache, err := lru.New(maxEventsCache)
@@ -159,21 +155,21 @@ func (sl *AWSServerless) logTail(ctx context.Context, logGroupName string) error
 			if _, ok := sl.eventCache.Peek(event.EventId); !ok {
 				sl.eventCache.Add(event.EventId, nil)
 
-				logger.Infow(*event.Message, zap.String("function_name", sl.funcName), zap.String("request_id", sl.requestId))
+				logger.Infow(*event.Message, zap.String("function_name", sl.funcName), zap.String("request_id", sl.requestID))
 
-				if sl.requestId == "" {
+				if sl.requestID == "" {
 					start := startRequestRe.FindStringSubmatch(*event.Message)
 					if len(start) == 2 {
-						sl.requestId = start[1]
+						sl.requestID = start[1]
 					}
 				} else {
 					end := endRequestRe.FindStringSubmatch(*event.Message)
 					if len(end) == 2 {
 						done <- struct{}{}
-						if sl.requestId == end[1] {
-							logger.Infof("%s has been finished", sl.requestId)
+						if sl.requestID == end[1] {
+							logger.Infof("%s has been finished", sl.requestID)
 						} else {
-							logger.Infof("%s has already finished but not catched", sl.requestId)
+							logger.Infof("%s has already finished but not catched", sl.requestID)
 						}
 					}
 				}
