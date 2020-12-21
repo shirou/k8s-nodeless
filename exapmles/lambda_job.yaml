@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: k8s-nodeless-lambda
+spec:
+  template:
+    spec:
+      serviceAccountName: LambdaExecute
+      containers:
+      - name: nodeless
+        image: shirou/k8s-nodeless
+        args: ["-func_name",  ""]
+      restartPolicy: Never
+  backoffLimit: 1
