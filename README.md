@@ -19,6 +19,14 @@ Create kubernetes manifest which use k8s-nodeless Docker image.
 
 ```
 
+Note: if you use AWS eks, need IAMServiceAccount to execute Lambda.
+
+```
+eksctl create iamserviceaccount --name lambda-execute --cluster sampleprj-stg-1 \
+--attach-policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole \
+--approve
+```
+
 ### 2. Run a Job with kurbernetes manner
 
 ```

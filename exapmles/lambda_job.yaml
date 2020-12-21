@@ -5,10 +5,16 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: LambdaExecute
+      serviceAccountName: lambda-execute
       containers:
       - name: nodeless
         image: shirou/k8s-nodeless
-        args: ["-func_name",  ""]
+        env:
+          - name: FUNC
+            value: "arn:aws:lambda:ap-northeast-1:9999999999999:function:test-eks-lambda-invoke"
+          - name: JSON
+            value: "true"
+          - name: PAYLOAD
+            value: "{\"time\": \"fooo\"}"
       restartPolicy: Never
   backoffLimit: 1
